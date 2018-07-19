@@ -27,6 +27,7 @@ var c = {
 	,maxAmplitude: 400
 	,padding: -200
 	,turnsPerSecond: 0.05
+	,translateZ: -1.5
 }
 
 var img = document.createElement("img");
@@ -65,7 +66,7 @@ function processImage(){
 	displayHeight = displayHeight * 0.3;
 	
 	var translateX = ~~(width/2 - displayWidth/2)+0.5;
-	var translateY = ~~(height/2 - displayHeight/2 + c.maxAmplitude/2)+0.5;
+	var translateY = ~~(height/2 - displayHeight/2)+0.5;
 	
 	context.fillStyle = c.background;
 	context.fillRect(0, 0, canvas.width, canvas.height);
@@ -110,11 +111,32 @@ function processImage(){
 		context.beginPath();
 		
 		for(var i = 0; i < imageData.length; i += 4){
-			var x = (i/4)%imageWidth;
-			var y = ~~((i/4)/imageWidth);
-			var distance = ((y+1)/(lineCount+1));
+			var x = ((i/4)%imageWidth)/imageWidth - 0.5;
+			var z = (~~((i/4)/imageWidth))/imageHeight - 0.5 + c.translateZ;
+			var y = imageData[i]/256 - 0.5;
+			
+			var isNewLine = (i/4)%imageWidth == 0;
+			
+			var drawX = (x/z + 0.5)*displayWidth;
+			var drawY = (y/z + 0.5)*displayHeight;
+			
+			if(isNewLine){
+				
+				context.lineWidth = (z+0.5-c.translateZ)*0.3+0.1;
+				var color = (z+0.5-c.translateZ)*128+128;
+				context.strokeStyle = "rgb(0, "+color+", 0)";
+				
+				context.stroke();
+				context.beginPath();
+				
+				context.moveTo(drawX, drawY);
+			} else {
+				context.lineTo(drawX, drawY);
+			}
+			
+			
 			//distance = distance * distance;
-			var distanceWidth = (displayWidth*(distance*0.9+0.1));
+			/*var distanceWidth = (displayWidth*(distance*0.9+0.1));
 			var distancePadding = (displayWidth-distanceWidth)/2;
 			
 			if(x == 0){
@@ -131,10 +153,10 @@ function processImage(){
 				context.moveTo(distancePadding, posY);
 			} else {
 				context.lineTo(posX, posY);
-			}
+			}*/
 		}
 		
-		function draw(distance, distanceWidth, distancePadding){
+		/*function draw(distance, distanceWidth, distancePadding){
 			context.lineWidth = (distance/2)+0.1;
 			var color = (Math.pow(distance, 1.5)) * 128 + 128;
 			//context.fillStyle = "rgb("+color+", "+color+", "+color+")";
@@ -146,7 +168,7 @@ function processImage(){
 			//context.closePath();
 			//context.fill();
 			context.beginPath();
-		}
+		}*/
 		
 		requestAnimationFrame(render);
 		
